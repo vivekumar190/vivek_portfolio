@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Script from 'next/script'
+import ThemeSwitcher from '@/components/ThemeSwitcher'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,16 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <Script id="theme-switcher" strategy="beforeInteractive">
-        {`
-          // On page load or when changing themes, best to add inline in \`head\` to avoid FOUC
-          if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark')
-          } else {
-            document.documentElement.classList.remove('dark')
-          }
-        `}
-      </Script>
+      <ThemeSwitcher />
       <body className={`${inter.className} min-h-screen`}>
         {children}
       </body>

@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { FaEnvelope, FaMapMarkerAlt, FaGithub, FaLinkedinIn, FaTwitter, FaTerminal, FaCode, FaPaperPlane, FaCalendarAlt, FaTimes } from 'react-icons/fa';
 import { InlineWidget } from 'react-calendly';
 
+// Create a static initial matrix to ensure server/client match
+const createStaticMatrix = () => {
+  const rows = 10;
+  const cols = 20;
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => '0')
+  );
+};
+
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -23,6 +32,8 @@ const Contact = () => {
   const [cursorVisible, setCursorVisible] = useState(true);
   const [commandExecuted, setCommandExecuted] = useState(false);
   const [showCalendlyModal, setShowCalendlyModal] = useState(false);
+  const [binaryMatrix, setBinaryMatrix] = useState(createStaticMatrix());
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Terminal typing effect
   useEffect(() => {
@@ -52,6 +63,31 @@ const Contact = () => {
     
     return () => clearInterval(cursorInterval);
   }, []);
+
+  // Mark component as hydrated
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Start animation only after hydration
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const updateMatrix = () => {
+      setBinaryMatrix(prevMatrix => 
+        prevMatrix.map(row =>
+          row.map(() => (Math.random() > 0.5 ? '1' : '0'))
+        )
+      );
+    };
+
+    // Initial update
+    updateMatrix();
+
+    // Set up interval for updates
+    const interval = setInterval(updateMatrix, 1000);
+    return () => clearInterval(interval);
+  }, [isHydrated]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +186,26 @@ const Contact = () => {
         </div>
       )}
 
-      <section id="contact" className="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+      <section id="contact" className="py-24 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/30 dark:bg-blue-900/20 rounded-full filter blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-100/30 dark:bg-purple-900/20 rounded-full filter blur-3xl"></div>
+          
+          {/* Binary Matrix Animation */}
+          <div className="absolute inset-0 overflow-hidden opacity-5">
+            <div className={`absolute top-0 left-0 w-full h-full flex flex-col gap-4 font-mono text-sm ${isHydrated ? 'animate-slide' : ''}`}>
+              {binaryMatrix.map((row, i) => (
+                <div key={i} className="whitespace-nowrap">
+                  {row.map((bit, j) => (
+                    <span key={j}>{bit}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
